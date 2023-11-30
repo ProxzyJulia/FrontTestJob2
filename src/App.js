@@ -1,8 +1,12 @@
 import './App.css';
-import { WagmiConfig, createConfig, configureChains, mainnet,useConnect } from 'wagmi';
+import { WagmiConfig, createConfig, configureChains, mainnet,useConnect,useConfig } from 'wagmi';
 import { MetaMaskConnector } from 'wagmi/connectors/metaMask';
 import { publicProvider } from 'wagmi/providers/public'
-
+import { BuyModal } from '@reservoir0x/reservoir-kit-ui'
+import {
+  ReservoirKitProvider
+} from '@reservoir0x/reservoir-kit-ui'
+import { reservoirChains } from '@reservoir0x/reservoir-sdk'
 const { chains, publicClient, webSocketPublicClient } = configureChains(
   [mainnet],[publicProvider()]);
 
@@ -64,12 +68,28 @@ export function Profile() {
 
 function App() {
   return (
-    
-    <><WagmiConfig config={config}>
+    <><ReservoirKitProvider
+      options={{
+       
+        chains: [{
+          ...reservoirChains.mainnet,
+          active: true,
+        }]
+      }}
+     
+    ><WagmiConfig config={config}>
 
       <Profile />
-
-    </WagmiConfig><><img src={objNFT.tokens[tokId].image} /><table>
+      <BuyModal
+        trigger={<button>
+          Buy Token
+        </button>}
+        collectionId={collection}
+        tokenId={objNFT.tokens[tokId].tokenId}
+        onPurchaseComplete={(data) => console.log('Purchase Complete')}
+        onPurchaseError={(error, data) => console.log('Transaction Error', error, data)}
+        onClose={(data, stepData, currentStep) => console.log('Modal Closed')} />
+    </WagmiConfig></ReservoirKitProvider><><img src={objNFT.tokens[tokId].image} /><table>
       <tr>
         <td>NFT id</td><td>{objNFT.tokens[tokId].tokenId}</td>
       </tr>
@@ -92,7 +112,6 @@ function App() {
         <td>Price</td><td>{objNFT.tokens[tokId].floorAskPrice}</td>
       </tr>
     </table></></>
-    
   );
 }
 
